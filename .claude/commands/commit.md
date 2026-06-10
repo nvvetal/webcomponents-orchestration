@@ -2,6 +2,16 @@
 
 Rules for creating git commits in this project. Follow these whenever the user asks to commit or push changes.
 
+## Multi-Repo Awareness
+
+This is an orchestration project. The `repositories/` directory contains independent git repos (each is a standalone clone, NOT submodules). When committing:
+
+1. **Always check all repos for changes** — run `git status` and `git diff` in the orchestration root AND in each directory under `repositories/` (cd into each directory to run git commands)
+2. **Report what changed where** — before committing, summarize which repos have changes so the user sees the full picture
+3. **Commit each repo independently** — each repo gets its own commit with a message appropriate to its changes
+4. **Respect user scope** — if the user says "commit this repo" or names a specific repo, only commit there. If unspecified, commit all repos that have changes
+5. **Order matters** — when changes span repos (e.g. a dependency was renamed), commit the dependency first, then the dependent
+
 ## When to Commit
 
 - Commit **after** a coherent unit of work is complete — a fix, a feature, a refactor, a test suite
