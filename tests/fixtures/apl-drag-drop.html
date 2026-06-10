@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>APL Drag-Drop Test</title>
+</head>
+<body>
+<script src="/webcomponents/utils/uid.js"></script>
+<script src="/webcomponents/utils/APLComponentRegistry.js"></script>
+<script src="/webcomponents/BestAppsComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/BestAppsObjectInspectorComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/BestAppsObjectInspectorObjectsComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/BestAppsObjectInspectorTabsComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/BestAppsObjectInspectorTabComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertiesTabComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyInputComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyListComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyArrayComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Event/BestAppsObjectInspectorEventsTabComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/BestAppsPropertyAdaptor.js"></script>
+<script src="/webcomponents-apl/APLProperties.js"></script>
+<script src="/webcomponents-apl/APLEvents.js"></script>
+<script src="/webcomponents-apl/APLComponent.js"></script>
+<script src="/webcomponents-apl/APLMultiChildComponent.js"></script>
+<script src="/webcomponents-apl/APLContainerComponent.js"></script>
+<script src="/webcomponents-apl/APLFrameComponent.js"></script>
+<script src="/webcomponents-apl/APLImageComponent.js"></script>
+<script src="/webcomponents-apl/APLTextComponent.js"></script>
+<script src="/webcomponents-apl/APLActionableComponent.js"></script>
+<script src="/webcomponents-apl/APLTouchableComponent.js"></script>
+<script src="/webcomponents-apl/APLTouchWrapperComponent.js"></script>
+<script src="/webcomponents-apl/APLDocumentComponent.js"></script>
+<script src="/webcomponents-apl/APLDom.js"></script>
+<script src="/webcomponents-apl/APLScreen.js"></script>
+<script src="/webcomponents-apl/APLFactory.js"></script>
+<script src="/webcomponents-apl/APLLoader.js"></script>
+<script src="/webcomponents-apl/ObjectInspector/APLObjectInspectorObjectsComponent.js"></script>
+
+<div id="doc-container" style="width:500px;height:400px;"></div>
+<div id="inspector-container" style="width:300px;height:400px;"></div>
+
+<script>
+window._consoleErrors = [];
+const origError = console.error;
+console.error = function() {
+    window._consoleErrors.push(Array.from(arguments).map(String).join(' '));
+    origError.apply(console, arguments);
+};
+window._unhandledErrors = [];
+window.addEventListener('unhandledrejection', (e) => {
+    window._unhandledErrors.push(e.reason?.message || String(e.reason));
+});
+
+window.addEventListener('load', async () => {
+    const screens = APLScreen.getScreens();
+    const aplScreen = new APLScreen({
+        container: document.getElementById('doc-container'),
+        device: screens.echoShow2,
+    });
+
+    const aplFactory = new APLFactory({
+        palette: null,
+        screen: aplScreen,
+    });
+
+    const docEl = aplFactory.create(APLDocumentComponent, document.getElementById('doc-container'));
+    await docEl.loadedDefer.promise;
+
+    const aplScheme = {
+        document: {
+            mainTemplate: {
+                items: [
+                    {
+                        type: 'Container', direction: 'row',
+                        items: [
+                            { type: 'Frame', backgroundColor: '#ff0000' },
+                            { type: 'Text', text: 'Hello' },
+                        ],
+                    },
+                ],
+            },
+        },
+    };
+    const aplDom = new APLDom({ aplDocument: aplScheme });
+    aplFactory.setDom(aplDom);
+    window._aplDom = aplDom;
+    window._aplFactory = aplFactory;
+
+    // Build tree: Container1 > [Frame1, Text1]
+    const container1 = await aplFactory.copyFromTag(
+        APLContainerComponent.tag, 'APLContainer', docEl, { type: 'Container', direction: 'row' }
+    );
+    container1.setAPLParent(docEl);
+    aplDom.addByComponent(container1, docEl);
+
+    const frame1 = await aplFactory.copyFromTag(
+        APLFrameComponent.tag, 'APLFrame', container1, { type: 'Frame', backgroundColor: '#ff0000' }
+    );
+    frame1.setAPLParent(container1);
+    aplDom.addByComponent(frame1, container1);
+
+    const text1 = await aplFactory.copyFromTag(
+        APLTextComponent.tag, 'APLText', container1, { type: 'Text', text: 'Hello' }
+    );
+    text1.setAPLParent(container1);
+    aplDom.addByComponent(text1, container1);
+
+    // Set up inspector
+    const inspector = document.createElement(BestAppsObjectInspectorComponent.tag);
+    inspector.id = 'inspector1';
+    inspector.setOptions({
+        nameAttribute: 'apl-name',
+        typeAttribute: 'apl-type',
+        objectsSelector: APLObjectInspectorObjectsComponent,
+    });
+    document.getElementById('inspector-container').appendChild(inspector);
+    await inspector.loadedDefer.promise;
+
+    const adaptor = new BestAppsPropertyAdaptor({ inspector });
+    const tabs = [{
+        name: 'Properties',
+        class: BestAppsObjectInspectorPropertiesTabComponent,
+        options: { properties: {} },
+    }];
+
+    aplFactory.setInspector(inspector);
+
+    inspector.objectsSelectorComponent.setContext({
+        aplDom,
+        aplFactory,
+        viewComponent: (component) => {
+            let properties = component.getAPLProperties();
+            let data = component.getAPLData();
+            for (const key in properties) {
+                APLProperties.encode(component, key, data[key] || properties[key]?.value || properties[key]?.default);
+            }
+        },
+    });
+
+    aplFactory.onSelect = (comp) => {
+        adaptor.update(comp, tabs);
+    };
+
+    // Register components in inspector
+    await inspector.update({ component: container1, tabs });
+    await inspector.update({ component: frame1, tabs });
+    await inspector.update({ component: text1, tabs });
+
+    window._inspector = inspector;
+    window._container1 = container1;
+    window._frame1 = frame1;
+    window._text1 = text1;
+    window._testReady = true;
+});
+</script>
+</body>
+</html>

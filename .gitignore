@@ -1,0 +1,6 @@
+webcomponents/
+webcomponents-apl/
+node_modules/
+tests/dist/
+tests/screenshots/
+.idea/

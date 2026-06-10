@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>APL Scale Picker Test</title></head>
+<body>
+<script src="/webcomponents/utils/uid.js"></script>
+<script src="/webcomponents/utils/APLComponentRegistry.js"></script>
+<script src="/webcomponents/BestAppsComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/BestAppsObjectInspectorTabComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyInputComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyListComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyArrayComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertiesTabComponent.js"></script>
+<script src="/webcomponents-apl/ObjectInspector/tab/property/APLObjectInspectorPropertyScaleComponent.js"></script>
+<script src="/webcomponents-apl/ObjectInspector/tab/property/APLObjectInspectorPropertiesTabComponent.js"></script>
+<div id="container" style="width:300px;height:500px;"></div>
+<script>
+window._consoleErrors = [];
+window._consoleWarnings = [];
+window._changedEvents = [];
+const origError = console.error;
+const origWarn = console.warn;
+console.error = function() {
+    window._consoleErrors.push(Array.from(arguments).map(String).join(' '));
+    origError.apply(console, arguments);
+};
+console.warn = function() {
+    window._consoleWarnings.push(Array.from(arguments).map(String).join(' '));
+    origWarn.apply(console, arguments);
+};
+
+window.addEventListener('load', async () => {
+    const container = document.getElementById('container');
+    const tab = document.createElement(APLObjectInspectorPropertiesTabComponent.tag);
+    tab.id = 'proptab1';
+    tab._data.options = {
+        tabName: 'Properties',
+        properties: {
+            scale: {
+                type: 'list',
+                items: ['fill', 'best-fill', 'best-fit', 'best-fit-down', 'none'],
+                default: 'best-fit',
+                value: 'best-fit',
+                options: {
+                    visual: 'scale-picker',
+                },
+            },
+            position: {
+                type: 'list',
+                items: ['relative', 'absolute', 'sticky'],
+                default: 'relative',
+                value: 'relative',
+                options: {
+                    css: true,
+                },
+            },
+        },
+    };
+    container.appendChild(tab);
+    await tab.loadedDefer.promise;
+    for (const prop of tab.properties) {
+        await prop.loadedDefer.promise;
+    }
+
+    tab.subscribe(BestAppsComponent.EVENT_CHANGED, (data) => {
+        window._changedEvents.push(data);
+    });
+
+    window._testReady = true;
+});
+</script>
+</body>
+</html>

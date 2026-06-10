@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>APL Data Tab Test</title>
+    <link rel="stylesheet" href="/webcomponents-apl/vendor/jsoneditor/jsoneditor.css">
+</head>
+<body>
+<script src="/webcomponents/utils/uid.js"></script>
+<script src="/webcomponents/utils/APLComponentRegistry.js"></script>
+<script src="/webcomponents/BestAppsComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/BestAppsObjectInspectorTabComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyInputComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyListComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertyArrayComponent.js"></script>
+<script src="/webcomponents/custom/ObjectInspector/tab/Property/BestAppsObjectInspectorPropertiesTabComponent.js"></script>
+<script src="/webcomponents-apl/vendor/jsoneditor/jsoneditor.js"></script>
+<script src="/webcomponents-apl/ObjectInspector/tab/APLObjectInspectorDataTabComponent.js"></script>
+<div id="container" style="width:400px;height:500px;">
+    <apl-object-inspector-data-tab-component id="datatab1"></apl-object-inspector-data-tab-component>
+</div>
+<script>
+window._consoleErrors = [];
+window._consoleWarnings = [];
+const origError = console.error;
+const origWarn = console.warn;
+console.error = function() {
+    window._consoleErrors.push(Array.from(arguments).map(String).join(' '));
+    origError.apply(console, arguments);
+};
+console.warn = function() {
+    window._consoleWarnings.push(Array.from(arguments).map(String).join(' '));
+    origWarn.apply(console, arguments);
+};
+
+window.addEventListener('load', async () => {
+    const tab = document.getElementById('datatab1');
+    await tab.setOptions({
+        tabName: 'Data',
+        properties: {
+            type: 'Container',
+            width: '100%',
+            height: '100%',
+            direction: 'row',
+            items: [
+                { type: 'Frame', backgroundColor: '#ff0000' },
+                { type: 'Text', text: 'Hello World' },
+            ],
+        },
+    });
+    await tab.loadedDefer.promise;
+
+    // Wait a tick for JSONEditor to fully render
+    setTimeout(() => { window._testReady = true; }, 200);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "bestapps-webcomponents-orchestration",
+  "private": true,
+  "scripts": {
+    "test": "cross-env TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=tests/tsconfig.json npx wdio tests/wdio.conf.js",
+    "test:headed": "cross-env TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=tests/tsconfig.json WDIO_HEADED=true npx wdio tests/wdio.conf.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10",
+    "@wdio/cli": "^8",
+    "@wdio/globals": "^8",
+    "@wdio/local-runner": "^8",
+    "@wdio/mocha-framework": "^8",
+    "@wdio/spec-reporter": "^8",
+    "cross-env": "^7.0.3",
+    "ts-node": "^10",
+    "typescript": "^5"
+  }
+}
