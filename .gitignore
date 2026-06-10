@@ -1,5 +1,4 @@
-webcomponents/
-webcomponents-apl/
+repositories/
 node_modules/
 tests/dist/
 tests/screenshots/
