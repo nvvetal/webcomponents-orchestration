@@ -12,6 +12,7 @@
     "@wdio/local-runner": "^8",
     "@wdio/mocha-framework": "^8",
     "@wdio/spec-reporter": "^8",
+    "chromedriver": "^148.0.4",
     "cross-env": "^7.0.3",
     "ts-node": "^10",
     "typescript": "^5"
