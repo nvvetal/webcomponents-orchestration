@@ -10,16 +10,16 @@ This is a **multi-repo orchestration layer** for the BestApps WebComponents ecos
 
 ### Linked Repositories
 
-Both are `.gitignored` and must be cloned separately into this directory:
+Both live under `repositories/` (`.gitignored`) and must be cloned separately:
 
-- **webcomponents/** - the base framework repo containing `BestAppsComponent`, ObjectInspector, ObjectPalette, and shared utilities
-- **webcomponents-apl/** - the APL components repo containing all Alexa Presentation Language components, inspector extensions, and APL-specific tooling
+- **repositories/webcomponents/** - the base framework repo (`@bestapps/webcomponents`) containing `BestAppsComponent`, ObjectInspector, ObjectPalette, and shared utilities
+- **repositories/webcomponents-apl/** - the APL components repo (`@bestapps/webcomponents-apl`) containing all Alexa Presentation Language components, inspector extensions, and APL-specific tooling. Depends on `@bestapps/webcomponents`.
 
 ### Setup
 
 1. Clone this orchestration repo
-2. Clone the base framework repo into `webcomponents/`
-3. Clone the APL repo into `webcomponents-apl/`
+2. Clone the base framework repo into `repositories/webcomponents/`
+3. Clone the APL repo into `repositories/webcomponents-apl/`
 
 Both sub-repos are independent git repositories with their own histories, branches, and remotes.
 
@@ -48,7 +48,10 @@ This repo contains E2E tests that exercise cross-repo functionality -- scenarios
 
 ```
 index.html                        -- Full demo combining all components
-webcomponents/                    -- Base framework repo (.gitignored)
-webcomponents-apl/                -- APL components repo (.gitignored)
-tests/                            -- Integration E2E tests (WebdriverIO)
+repositories/
+  webcomponents/                   -- Base framework repo (.gitignored)
+  webcomponents-apl/               -- APL components repo (.gitignored)
+scripts/
+  check-versions.sh                -- NPM version/status checker
+tests/                             -- Integration E2E tests (WebdriverIO)
 ```
