@@ -83,7 +83,7 @@ foreach ($repoName in $allRepos) {
     }
 
     if ($alreadyBumped) {
-        # Version already bumped — just build and publish
+        # Version already bumped - just build and publish
         Write-Host "Version $localVer already bumped. Building and publishing..."
         npm run build
         if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: build failed" -ForegroundColor Red; Pop-Location; exit 1 }
@@ -170,7 +170,7 @@ foreach ($repoName in $allRepos) {
 }
 
 if ($pushed -eq 0) {
-    Write-Host "Nothing to push — all repos are up to date."
+    Write-Host "Nothing to push - all repos are up to date."
 } else {
     Write-Host "`n=== Verification ===" -ForegroundColor Cyan
     foreach ($dir in Get-ChildItem -Path $REPOS_DIR -Directory) {
