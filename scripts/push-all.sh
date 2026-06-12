@@ -74,7 +74,13 @@ for repo_name in "${ALL_REPOS[@]}"; do
     git rev-parse --verify origin/main >/dev/null 2>&1 && \
         ahead=$(git log --oneline origin/main..HEAD 2>/dev/null | wc -l | tr -d ' ')
 
-    if [ -z "$dirty" ] && [ "$ahead" -eq 0 ] 2>/dev/null && [ "$local_ver" = "$npm_ver" ]; then
+    # commits since the published version's tag = unreleased work
+    since_tag=0
+    if git rev-parse --verify "refs/tags/$local_ver" >/dev/null 2>&1; then
+        since_tag=$(git rev-list "$local_ver..HEAD" --count 2>/dev/null | tr -d ' ')
+    fi
+
+    if [ -z "$dirty" ] && [ "$ahead" -eq 0 ] 2>/dev/null && [ "$local_ver" = "$npm_ver" ] && [ "$since_tag" -eq 0 ] 2>/dev/null; then
         echo "--- $repo_name: fully up to date, skipping ---"
         echo ""
         continue

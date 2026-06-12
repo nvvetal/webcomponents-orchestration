@@ -42,6 +42,14 @@ for repo_dir in "$REPOS_DIR"/*/; do
     ahead_str=""
     [ "$ahead" -gt 0 ] 2>/dev/null && ahead_str=" [AHEAD:$ahead]"
 
+    # commits since the published version's tag = unreleased work
+    since_tag=0
+    if git rev-parse --verify "refs/tags/$local_ver" >/dev/null 2>&1; then
+        since_tag=$(git rev-list "$local_ver..HEAD" --count 2>/dev/null | tr -d ' ')
+    fi
+    since_str=""
+    [ "$since_tag" -gt 0 ] 2>/dev/null && since_str=" [UNRELEASED:$since_tag]"
+
     ver_status="OK"
     [ "$local_ver" != "$npm_ver" ] && ver_status="DIFFERS"
     [ "$npm_ver" = "not published" ] && ver_status="UNPUBLISHED"
@@ -53,11 +61,12 @@ for repo_dir in "$REPOS_DIR"/*/; do
     ")
 
     echo "  $repo_name ($pkg_name)"
-    echo "    Local: $local_ver | NPM: $npm_ver [$ver_status]$dirty$ahead_str"
+    echo "    Local: $local_ver | NPM: $npm_ver [$ver_status]$dirty$ahead_str$since_str"
     echo "    Internal deps: $int_deps"
 
     needs_push="no"
     [ -n "$dirty" ] || [ "$ahead" -gt 0 ] 2>/dev/null && needs_push="yes"
+    [ "$since_tag" -gt 0 ] 2>/dev/null && needs_push="yes"
     [ "$ver_status" = "UNPUBLISHED" ] && needs_push="yes"
     echo "    Needs push: $needs_push"
     echo ""

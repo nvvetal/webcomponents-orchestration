@@ -57,7 +57,13 @@ foreach ($repoName in $allRepos) {
     }
     $tagExists = git tag -l $localVer 2>$null
 
-    if (-not $dirty -and $ahead -eq 0 -and $localVer -eq $npmVer) {
+    # commits since the published version's tag = unreleased work
+    $sinceTag = 0
+    if ($tagExists) {
+        $sinceTag = [int](git rev-list "$localVer..HEAD" --count 2>$null)
+    }
+
+    if (-not $dirty -and $ahead -eq 0 -and $localVer -eq $npmVer -and $sinceTag -eq 0) {
         Write-Host "--- $repoName : up to date, skipping ---`n" -ForegroundColor DarkGray
         Pop-Location
         continue
