@@ -171,7 +171,21 @@ foreach ($repoName in $allRepos) {
                 Write-Host "Updating $pkgName to $targetVer in $($otherDir.Name)/package.json"
                 Push-Location $otherDir.FullName
                 node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));if(p.dependencies&&p.dependencies['$pkgName'])p.dependencies['$pkgName']='$targetVer';if(p.devDependencies&&p.devDependencies['$pkgName'])p.devDependencies['$pkgName']='$targetVer';fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');"
+                # refresh lockfile + node_modules so npm ci keeps working;
+                # retry because the registry can lag right after publish
+                $installed = $false
+                foreach ($attempt in 1..3) {
+                    npm install --no-audit --no-fund
+                    if ($LASTEXITCODE -eq 0) { $installed = $true; break }
+                    Start-Sleep -Seconds 10
+                }
+                if (-not $installed) {
+                    Write-Host "ERROR: npm install failed in $($otherDir.Name)" -ForegroundColor Red
+                    Pop-Location; Pop-Location
+                    exit 1
+                }
                 git add package.json
+                if (Test-Path "package-lock.json") { git add package-lock.json }
                 git commit -m "chore(deps): update $pkgName to $publishedVer"
                 Pop-Location
             }

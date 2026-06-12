@@ -80,6 +80,16 @@ for repo_name in "${ALL_REPOS[@]}"; do
         continue
     fi
 
+    # Fail fast if the remote has commits we don't have — otherwise the
+    # version-bump commit gets published to npm but main is unpushable
+    git fetch origin >/dev/null 2>&1
+    behind=$(git log --oneline HEAD..origin/main 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$behind" -gt 0 ] 2>/dev/null; then
+        echo "ERROR: $repo_name is behind origin/main ($behind commit(s))."
+        echo "Pull/merge in $repo_dir first, then re-run this script."
+        exit 1
+    fi
+
     echo "========================================"
     echo "  $repo_name ($pkg_name)"
     echo "  Local: $local_ver | NPM: ${npm_ver:-not published}"
@@ -159,7 +169,19 @@ for repo_name in "${ALL_REPOS[@]}"; do
                     if(pkg.devDependencies?.['$pkg_name']) pkg.devDependencies['$pkg_name']='$target_dep_ver';
                     fs.writeFileSync('package.json', JSON.stringify(pkg,null,2)+'\n');
                 "
+                # refresh lockfile + node_modules so npm ci keeps working;
+                # retry because the registry can lag right after publish
+                installed=0
+                for attempt in 1 2 3; do
+                    if npm install --no-audit --no-fund; then installed=1; break; fi
+                    sleep 10
+                done
+                if [ "$installed" -ne 1 ]; then
+                    echo "ERROR: npm install failed in $other_name"
+                    exit 1
+                fi
                 git add package.json
+                [ -f package-lock.json ] && git add package-lock.json
                 git commit -m "chore(deps): update $pkg_name to $new_ver"
             fi
             echo ""
