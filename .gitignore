@@ -3,3 +3,5 @@ node_modules/
 tests/dist/
 tests/screenshots/
 .idea/
+screenshots/*
+!screenshots/.gitkeep
