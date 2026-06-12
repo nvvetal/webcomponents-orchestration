@@ -1,5 +1,8 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <title>APL Editor</title>
     <style>
         #container {
             display: flex;
@@ -31,20 +34,17 @@
         #screen {
             height: 25px;
         }
+
+        #data {
+            width: 400px;
+            height: 500px;
+        }
     </style>
-    <script
-            src="https://code.jquery.com/jquery-3.7.1.min.js"
-            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-            crossorigin="anonymous">
-    </script>
 
     <!-- Base scripts from webcomponents repo -->
     <script src="./repositories/webcomponents/utils/uid.js"></script>
     <script src="./repositories/webcomponents/utils/APLComponentRegistry.js"></script>
     <script src="./repositories/webcomponents/BestAppsComponent.js"></script>
-
-    <!-- AppYearMonth from webcomponents repo -->
-    <script src="./repositories/webcomponents/custom/AppYearMonthComponent.js"></script>
 
     <!-- ObjectInspector from webcomponents repo -->
     <script src="./repositories/webcomponents/custom/ObjectInspector/BestAppsObjectInspectorComponent.js"></script>
@@ -114,7 +114,7 @@
         <div id="screen"></div>
         <div id="document"></div>
     </div>
-    <div id="data" style="width:400px;height:500px;"></div>
+    <div id="data"></div>
 </div>
 <script>
 
@@ -137,46 +137,6 @@
 
             ]
         });
-
-        let customElement = document.createElement('div');
-        customElement.innerHTML = 'Test';
-        customElement.setAttribute('guid', '123');
-        customElement.style.backgroundColor = 'red';
-        customElement.setAttribute('name', `Custom`);
-        customElement.setAttribute('type', `Div`);
-        document.getElementById('container').appendChild(customElement);
-
-        let from = document.createElement(AppYearMonthComponent.tag);
-        from.subscribe(BestAppsComponent.EVENT_CHANGED, (data) => {
-            console.log('CHANGED FROM', data);
-        });
-        from.setAttribute('id', `from`);
-        from.setAttribute('year', `2024`);
-        from.setAttribute('month', `May`);
-        from.setAttribute('name', `From1`);
-        from.setAttribute('type', `Calendar`);
-
-        document.getElementById('container').appendChild(from);
-        let to = document.createElement(AppYearMonthComponent.tag);
-        to.subscribe(BestAppsComponent.EVENT_CHANGED, (data) => {
-            console.log('CHANGED TO', data);
-        });
-        to.setAttribute('year', `2023`);
-        to.setAttribute('month', `Jan`);
-        to.setAttribute('name', `To1`);
-        to.setAttribute('type', `Calendar`);
-        document.getElementById('container').appendChild(to);
-
-
-        //TODO: set active component options if smt changing
-        setTimeout(() => {
-            let el = document.getElementById('from').cloneNode(true);
-            el.setAttribute('id', `from2`);
-            document.getElementById('container').appendChild(el);
-            let el2 = $('#from').clone(true, true);
-            $('#container').append(el2);
-            el2.attr('debug', 'debug');
-        }, 1);
     });
 
 </script>
