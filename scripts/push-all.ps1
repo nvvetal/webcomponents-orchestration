@@ -63,6 +63,17 @@ foreach ($repoName in $allRepos) {
         continue
     }
 
+    # Fail fast if the remote has commits we don't have - otherwise the
+    # version-bump commit gets published to npm but main is unpushable
+    git fetch origin 2>$null | Out-Null
+    $behind = git log --oneline HEAD..origin/main 2>$null
+    if ($behind) {
+        Write-Host "ERROR: $repoName is behind origin/main ($(@($behind).Count) commit(s))." -ForegroundColor Red
+        Write-Host "Pull/merge in $repoPath first, then re-run this script." -ForegroundColor Red
+        Pop-Location
+        exit 1
+    }
+
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host "  $repoName ($pkgName)" -ForegroundColor Cyan
     Write-Host "  Local: $localVer | NPM: $npmVer" -ForegroundColor Cyan
@@ -97,6 +108,7 @@ foreach ($repoName in $allRepos) {
         $aheadNow = git log --oneline origin/main..HEAD 2>$null
         if ($aheadNow) {
             git push origin main
+            if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: git push failed" -ForegroundColor Red; Pop-Location; exit 1 }
         }
         if (-not $tagExists) {
             git tag $localVer
@@ -122,6 +134,7 @@ foreach ($repoName in $allRepos) {
         git add -A
         git commit -m "$newVer"
         git push origin main
+        if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: git push failed" -ForegroundColor Red; Pop-Location; exit 1 }
         git tag $newVer
         git push origin $newVer
 
@@ -178,7 +191,13 @@ if ($pushed -eq 0) {
         if (-not (Test-Path $pkgPath)) { continue }
         $pkg = Get-Content $pkgPath -Raw | ConvertFrom-Json
         $lv = $pkg.version
-        $nv = npm view $pkg.name version 2>$null
+        # registry reads can lag right after publish - retry before reporting a mismatch
+        $nv = $null
+        foreach ($attempt in 1..3) {
+            $nv = npm view $pkg.name version 2>$null
+            if ($nv -eq $lv) { break }
+            Start-Sleep -Seconds 5
+        }
         if (-not $nv) { $nv = "not published" }
         $st = if ($lv -eq $nv) { "OK" } else { "MISMATCH" }
         Write-Host "  $($dir.Name): Local $lv | NPM $nv [$st]"
