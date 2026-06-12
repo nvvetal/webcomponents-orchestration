@@ -37,12 +37,13 @@ Commit in dependency order: repos with no `@bestapps/*` deps first.
 
 ### 3. Hand Off to Interactive Script
 
-After all code changes are committed, tell the user to run the appropriate script for their OS:
+After all code changes are committed, tell the user to run:
 
-- **Windows:** `! powershell scripts/push-all.ps1`
-- **macOS/Linux:** `! bash scripts/push-all.sh`
+```
+! npm run push
+```
 
-Detect the platform from the environment (`win32` → PowerShell, otherwise → bash).
+This dispatches to the right script per OS (`scripts/push.js`: `win32` → `powershell scripts/push-all.ps1`, otherwise → `bash scripts/push-all.sh`). The scripts can also be run directly.
 
 The script handles everything:
 - Checks npm auth
@@ -79,8 +80,7 @@ For anything beyond these (rejected git push, version mismatches, broken lockfil
 
 ## Important
 
-- On Windows use `powershell scripts/push-all.ps1` (npm auth tokens not visible in Git Bash)
-- On macOS/Linux use `bash scripts/push-all.sh`
+- `npm run push` handles OS dispatch; on Windows it must go through powershell.exe (npm auth tokens not visible in Git Bash)
 - Never `--force` push or `--no-verify`
 - Each repo is an independent git clone — run git commands inside the repo directory
 - Follow the `/commit` convention for all code commits (type, scope, co-author)
