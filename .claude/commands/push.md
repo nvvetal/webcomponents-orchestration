@@ -75,6 +75,8 @@ After the script completes, confirm the results look correct. If any issues, hel
 | Script fails mid-push | Safe to re-run — detects already-bumped versions |
 | npm publish needs 2FA | Browser auth prompt opens automatically — user completes in browser |
 
+For anything beyond these (rejected git push, version mismatches, broken lockfiles in dependents, script parse errors), use the `/push-recovery` skill.
+
 ## Important
 
 - On Windows use `powershell scripts/push-all.ps1` (npm auth tokens not visible in Git Bash)
