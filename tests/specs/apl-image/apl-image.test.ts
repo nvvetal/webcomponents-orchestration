@@ -20,4 +20,11 @@ describe('APLImageComponent', () => {
     it('borderRadius should have CSS mapping', async () => {
         expect(await fixture.hasCSSMapping('borderRadius')).toBe(true);
     });
+
+    fixture.testHasProperties(['filters', 'overlayColor', 'overlayGradient']);
+    fixture.testPropertyType('filters', 'text');
+    fixture.testPropertyType('overlayColor', 'color');
+    fixture.testPropertyType('overlayGradient', 'text');
+
+    fixture.testHasEvents(['onLoad', 'onFail']);
 });

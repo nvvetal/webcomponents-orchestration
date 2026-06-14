@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>APL Page Render Test — Full Document Layout</title>
+</head>
+<body>
+<script src="/repositories/webcomponents/utils/uid.js"></script>
+<script src="/repositories/webcomponents/utils/APLComponentRegistry.js"></script>
+<script src="/repositories/webcomponents/BestAppsComponent.js"></script>
+<script src="/repositories/webcomponents-apl/APLProperties.js"></script>
+<script src="/repositories/webcomponents-apl/APLEvents.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLMultiChildComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLContainerComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLFrameComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLImageComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLTextComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLActionableComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLTouchableComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLTouchWrapperComponent.js"></script>
+<script src="/repositories/webcomponents-apl/ui/components/APLDocumentComponent.js"></script>
+<script src="/repositories/webcomponents-apl/APLDom.js"></script>
+<script src="/repositories/webcomponents-apl/APLScreen.js"></script>
+<script src="/repositories/webcomponents-apl/APLFactory.js"></script>
+<script src="/repositories/webcomponents-apl/APLLoader.js"></script>
+
+<div id="doc-container" style="width:640px;height:400px;"></div>
+
+<script>
+window._consoleErrors = [];
+const origError = console.error;
+console.error = function() {
+    window._consoleErrors.push(Array.from(arguments).map(String).join(' '));
+    origError.apply(console, arguments);
+};
+window._unhandledErrors = [];
+window.addEventListener('unhandledrejection', (e) => {
+    window._unhandledErrors.push(e.reason?.message || String(e.reason));
+});
+
+window.addEventListener('load', async () => {
+    const screens = APLScreen.getScreens();
+    const container = document.getElementById('doc-container');
+
+    const aplScreen = new APLScreen({
+        container,
+        device: screens.echoShow2,
+    });
+
+    const aplFactory = new APLFactory({
+        palette: null,
+        screen: aplScreen,
+    });
+
+    const docEl = aplFactory.create(APLDocumentComponent, container);
+    await docEl.loadedDefer.promise;
+
+    const aplScheme = {
+        document: {
+            mainTemplate: {
+                items: [
+                    {
+                        type: 'Container',
+                        width: '100%',
+                        height: '100%',
+                        direction: 'row',
+                        alignItems: 'start',
+                        wrap: 'noWrap',
+                        justifyContent: 'start',
+                        items: [
+                            {
+                                type: 'Frame',
+                                id: 'leftFrame',
+                                width: '50%',
+                                height: '100%',
+                                backgroundColor: '#fff',
+                                item: [
+                                    {
+                                        type: 'Image',
+                                        id: 'mainImage',
+                                        width: '100%',
+                                        height: '100%',
+                                        source: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                                        scale: 'fill',
+                                    }
+                                ],
+                            },
+                            {
+                                type: 'Frame',
+                                id: 'rightFrame',
+                                width: '50%',
+                                height: '100%',
+                                backgroundColor: '#fff',
+                                item: [
+                                    {
+                                        type: 'Container',
+                                        id: 'rightContainer',
+                                        width: '100%',
+                                        height: '100%',
+                                        direction: 'column',
+                                        alignItems: 'center',
+                                        wrap: 'noWrap',
+                                        items: [
+                                            {
+                                                type: 'Frame',
+                                                id: 'headerFrame',
+                                                width: '100%',
+                                                height: '40%',
+                                                item: [
+                                                    {
+                                                        type: 'Container',
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        alignItems: 'center',
+                                                        direction: 'column',
+                                                        justifyContent: 'center',
+                                                        items: [
+                                                            {
+                                                                type: 'Text',
+                                                                id: 'titleText',
+                                                                width: 'auto',
+                                                                height: 'auto',
+                                                                text: 'Welcome to Hotel',
+                                                                fontSize: '30dp',
+                                                                color: '#3F4B00',
+                                                                fontWeight: 'bold',
+                                                            }
+                                                        ],
+                                                    }
+                                                ],
+                                            },
+                                            {
+                                                type: 'Frame',
+                                                id: 'buttonsFrame',
+                                                width: '100%',
+                                                height: '60%',
+                                                item: [
+                                                    {
+                                                        type: 'Container',
+                                                        id: 'buttonsContainer',
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        direction: 'row',
+                                                        wrap: 'wrap',
+                                                        justifyContent: 'spaceBetween',
+                                                        alignItems: 'start',
+                                                        items: [
+                                                            {
+                                                                type: 'TouchWrapper',
+                                                                id: 'btn1',
+                                                                width: '45%',
+                                                                height: '40%',
+                                                                item: [
+                                                                    {
+                                                                        type: 'Frame',
+                                                                        width: '100%',
+                                                                        height: '100%',
+                                                                        borderWidth: '1',
+                                                                        borderColor: '#707070',
+                                                                        item: [
+                                                                            {
+                                                                                type: 'Container',
+                                                                                width: '100%',
+                                                                                height: '100%',
+                                                                                alignItems: 'center',
+                                                                                direction: 'column',
+                                                                                justifyContent: 'center',
+                                                                                items: [
+                                                                                    {
+                                                                                        type: 'Text',
+                                                                                        id: 'btn1Text',
+                                                                                        text: 'Check In',
+                                                                                        fontSize: '20dp',
+                                                                                        color: '#565656',
+                                                                                    }
+                                                                                ],
+                                                                            }
+                                                                        ],
+                                                                    }
+                                                                ],
+                                                            },
+                                                            {
+                                                                type: 'TouchWrapper',
+                                                                id: 'btn2',
+                                                                width: '45%',
+                                                                height: '40%',
+                                                                item: [
+                                                                    {
+                                                                        type: 'Frame',
+                                                                        width: '100%',
+                                                                        height: '100%',
+                                                                        borderWidth: '1',
+                                                                        borderColor: '#707070',
+                                                                        item: [
+                                                                            {
+                                                                                type: 'Container',
+                                                                                width: '100%',
+                                                                                height: '100%',
+                                                                                alignItems: 'center',
+                                                                                direction: 'column',
+                                                                                justifyContent: 'center',
+                                                                                items: [
+                                                                                    {
+                                                                                        type: 'Text',
+                                                                                        id: 'btn2Text',
+                                                                                        text: 'Check Out',
+                                                                                        fontSize: '20dp',
+                                                                                        color: '#565656',
+                                                                                    }
+                                                                                ],
+                                                                            }
+                                                                        ],
+                                                                    }
+                                                                ],
+                                                            },
+                                                        ],
+                                                    }
+                                                ],
+                                            },
+                                        ],
+                                    }
+                                ],
+                            },
+                        ],
+                    }
+                ],
+            },
+        },
+    };
+
+    const aplDom = new APLDom({ aplDocument: aplScheme });
+    aplFactory.setDom(aplDom);
+
+    const aplLoader = new APLLoader({
+        factory: aplFactory,
+        container: docEl,
+        dom: aplDom,
+    });
+
+    await aplLoader.createComponents(aplScheme.document.mainTemplate.items, docEl);
+
+    window._aplFactory = aplFactory;
+    window._aplDom = aplDom;
+    window._docEl = docEl;
+    window._testReady = true;
+});
+</script>
+</body>
+</html>
